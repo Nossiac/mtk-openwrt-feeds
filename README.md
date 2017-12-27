@@ -1,6 +1,6 @@
 ## What is this?
 
-This repo was a **unofficial** MediaTek feeds for [OpenWrt](https://openwrt.org "OpenWrt") or [Lede](https://lede-project.org). This project is experimental, and technical support will be limited.
+This repo was an **unofficial** MediaTek feeds for [OpenWrt](https://openwrt.org "OpenWrt") or [Lede](https://lede-project.org). This project is experimental, and technical support will be limited.
 
 In OpenWrt/Lede, a [feeds](https://wiki.openwrt.org/doc/devel/feeds "feeds") is collection of software components (applications, libraries, kernel-modules, ...) that you can integrate into your OpenWrt/Lede system.
 
@@ -21,18 +21,19 @@ Now you will be able to see extra packages via `make menuconfig`. All packages f
 
 ### mt7620/mt7610/mt7612/mt7628/mt7603/mt7615
 
-These are prebuilt WiFi modules for OpenWrt/Lede.
-
-The following drivers are planned :
+These are prebuilt WiFi modules for OpenWrt/Lede, including:
 
 * mt7620 (done)
 * mt7628 (done)
 * mt7610 (done)
-* mt7612 (todo)
-* mt7603 (todo)
+* mt7612 (done)
+* mt7603 (done)
 * mt7615 (done)
 
-Currently I only build them with latest stable branch of lede.
+I have set up a daily build for:
+
+* latest stable branch.
+* trunk branch.
 
 ### uci2dat
 
@@ -48,9 +49,9 @@ Note： OpenWrt/Lede has replaced nvram scheme with [uci](https://wiki.openwrt.o
 
 ### mtk-luci-plugin
 
-This is a plugin for LuCI web interface, which manipulate MTK's proprietary drivers by reading/writing its profile directly. It does not use uci, so "/etc/config/wireless" is left untouched.
+This is a plugin for LuCI web interface, which manipulates MTK's proprietary drivers by reading/writing its profile directly. It does not use uci, so "/etc/config/wireless" is left untouched.
 
-To use this, you should install LuCI first:
+To use it, you should install LuCI first:
 
 	scripts/feeds update
 	scripts/feeds install luci
