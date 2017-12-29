@@ -14,6 +14,8 @@ PKG_URLS:=http://nossiac.com/download/mtk-wifi-ko \
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/kernel.mk
 
+PKG_KO:=$(PKG_NAME)-for-$(CONFIG_TARGET_SUBTARGET)-linux-$(LINUX_VERSION).ko
+
 define Package/mt7615
   CATEGORY:=MTK Properties
   SUBMENU:=Drivers
@@ -36,15 +38,15 @@ endef
 
 define Build/Compile
 	for PKG_URL in $(PKG_URLS); do \
-		wget $$$${PKG_URL}/$(PKG_NAME)-linux-$(LINUX_VERSION).ko \
-			-O $(PKG_BUILD_DIR)/$(PKG_NAME)-linux-$(LINUX_VERSION).ko; \
+		wget $$$${PKG_URL}/$(PKG_KO) \
+			-O $(PKG_BUILD_DIR)/$(PKG_KO); \
 		if [ "$$$$?" != "0" ]; then continue; else break; fi \
 	done
 endef
 
 define Package/mt7615/install
 	$(INSTALL_DIR) $(1)/lib/modules/$(LINUX_VERSION)
-	-$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(PKG_NAME)-linux-$(LINUX_VERSION).ko \
+	-$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(PKG_KO) \
 		$(1)/lib/modules/$(LINUX_VERSION)/$(PKG_NAME).ko
 	$(CP) ./files/* $(1)/
 endef
