@@ -251,10 +251,12 @@ local WirelessModeList = {
 
 local DevicePropertyMap = {
     -- 2.4G
+    {device="MT7603", band={"0", "1", "4", "6", "7", "9"}},
     {device="MT7620", band={"0", "1", "4", "6", "7", "9"}},
     {device="MT7622", band={"0", "1", "4", "9"}},
     {device="MT7628", band={"0", "1", "4", "6", "7", "9"}},
     -- 5G
+    {device="MT7610", band={"2", "8", "11", "14", "15"}},
     {device="MT7612", band={"2", "8", "11", "14", "15"}},
     {device="MT7662", band={"2", "8", "11", "14", "15"}},
     -- Mix
