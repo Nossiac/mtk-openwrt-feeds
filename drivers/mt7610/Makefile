@@ -21,6 +21,7 @@ define Package/mt7610
   SUBMENU:=Drivers
   TITLE:=MTK MT7610 WiFi AP driver
   AUTOLOAD:=$(call AutoProbe,mt7610)
+  DEPENDS:=+wireless-tools
 endef
 
 

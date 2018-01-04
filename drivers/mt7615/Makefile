@@ -21,6 +21,7 @@ define Package/mt7615
   SUBMENU:=Drivers
   TITLE:=MTK MT7615 WiFi AP driver
   AUTOLOAD:=$(call AutoProbe,mt7615)
+  DEPENDS:=+wireless-tools
 endef
 
 define Package/mt7615/config-todo

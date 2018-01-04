@@ -21,6 +21,7 @@ define Package/mt7628
   SUBMENU:=Drivers
   TITLE:=MTK MT7628 WiFi AP driver
   AUTOLOAD:=$(call AutoProbe,mt7628)
+  DEPENDS:=+wireless-tools
 endef
 
 

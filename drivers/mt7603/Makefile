@@ -21,6 +21,7 @@ define Package/mt7603
   SUBMENU:=Drivers
   TITLE:=MTK MT7603 WiFi AP driver
   AUTOLOAD:=$(call AutoProbe,mt7603)
+  DEPENDS:=+wireless-tools
 endef
 
 
