@@ -16,14 +16,29 @@ include $(INCLUDE_DIR)/kernel.mk
 
 PKG_KO:=$(PKG_NAME)-for-$(CONFIG_TARGET_SUBTARGET)-linux-$(LINUX_VERSION).ko
 
+define Package/mt76x2
+  CATEGORY:=MTK Properties
+  SUBMENU:=Drivers
+  TITLE:=MTK MT76x2 WiFi AP driver
+  DEPENDS:=+wireless-tools
+  HIDDEN:=1
+endef
+
+define Package/mt7602
+  CATEGORY:=MTK Properties
+  SUBMENU:=Drivers
+  TITLE:=MTK MT7602 WiFi AP driver
+  AUTOLOAD:=$(call AutoProbe,mt7602)
+  DEPENDS:=+wireless-tools +mt76x2
+endef
+
 define Package/mt7612
   CATEGORY:=MTK Properties
   SUBMENU:=Drivers
   TITLE:=MTK MT7612 WiFi AP driver
   AUTOLOAD:=$(call AutoProbe,mt7612)
-  DEPENDS:=+wireless-tools
+  DEPENDS:=+wireless-tools +mt76x2
 endef
-
 
 define Package/mt7612/config-notyet
 	config MT7612_USING_LUA_SCRIPT
@@ -41,11 +56,29 @@ define Build/Compile
 	done
 endef
 
-define Package/mt7612/install
-	$(INSTALL_DIR) $(1)/lib/modules/$(LINUX_VERSION)
-	-$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(PKG_KO) \
-		$(1)/lib/modules/$(LINUX_VERSION)/$(PKG_NAME).ko
-	$(CP) ./files/* $(1)/
+
+define Package/mt76x2/install
+	if [ "$$(CONFIG_PACKAGE_mt7602)" != "" ] || [ "$$(CONFIG_PACKAGE_mt7612)" != "" ]; then \
+	$(INSTALL_DIR) $(1)/lib/modules/$(LINUX_VERSION); \
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(PKG_KO) \
+		$(1)/lib/modules/$(LINUX_VERSION)/mt7612.ko; \
+	fi
+
+	if [ "$$(CONFIG_PACKAGE_mt7602)" != "" ]; then \
+	$(INSTALL_DIR) $(1)/etc/wireless/mt7602; \
+	$(CP) ./files/etc/wireless/mt7602/mt7602.dat $(1)/etc/wireless/mt7602/mt7602.dat; \
+	$(INSTALL_DIR) $(1)/lib/wifi; \
+	$(CP) ./files/lib/wifi/mt7602.lua $(1)/lib/wifi/mt7602.lua; \
+	fi
+
+	if [ "$$(CONFIG_PACKAGE_mt7612)" != "" ]; then \
+	$(INSTALL_DIR) $(1)/etc/wireless/mt7612; \
+	$(CP) ./files/etc/wireless/mt7612/mt7612.dat $(1)/etc/wireless/mt7612/mt7612.dat; \
+	$(INSTALL_DIR) $(1)/lib/wifi; \
+	$(CP) ./files/lib/wifi/mt7612.lua $(1)/lib/wifi/mt7612.lua; \
+	fi
 endef
 
+$(eval $(call BuildPackage,mt76x2))
+$(eval $(call BuildPackage,mt7602))
 $(eval $(call BuildPackage,mt7612))
