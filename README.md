@@ -1,8 +1,8 @@
 ## What is this?
 
-This repo was an **unofficial** MediaTek feeds for [OpenWrt](https://openwrt.org "OpenWrt") or [Lede](https://lede-project.org). This project is experimental, and technical support will be limited.
+This repo is an **unofficial** MediaTek "feeds" for [OpenWrt](https://openwrt.org "OpenWrt") or [Lede](https://lede-project.org). This project is experimental, and technical support will be limited.
 
-In OpenWrt/Lede, a [feeds](https://wiki.openwrt.org/doc/devel/feeds "feeds") is collection of software components (applications, libraries, kernel-modules, ...) that you can integrate into your OpenWrt/Lede system.
+In OpenWrt/Lede, a ["feeds"](https://wiki.openwrt.org/doc/devel/feeds "feeds") is a collection of software components (applications, libraries, kernel-modules, ...) that you can integrate into your OpenWrt/Lede system.
 
 ## How can I use them?
 
@@ -26,14 +26,15 @@ These are prebuilt WiFi modules for OpenWrt/Lede, including:
 * mt7620 (done)
 * mt7628 (done)
 * mt7610 (done)
+* mt7602 (done)
 * mt7612 (done)
-* mt7603 (done)
+* mt7603 (done) # buggy
 * mt7615 (done)
 
-I have set up a daily build for:
+You can download all available wifi modules here:
+[http://nossiac.com/download/mtk-wifi-ko/](http://nossiac.com/download/mtk-wifi-ko/) . The are named as:
 
-* latest stable branch.
-* trunk branch.
+	<wifichip>-for-<cpuname>-linux-<kernel-version>.ko
 
 ### uci2dat
 
