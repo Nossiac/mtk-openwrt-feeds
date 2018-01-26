@@ -39,13 +39,12 @@ local cfgs = mtkwifi.load_profile(dev.profile)
     <fieldset class="cbi-section">
         <legend> Device Configurations - <%=devname%> 
 <%
-local fd = io.open("/tmp/mtk/wifi/"..dev.devname..".need_reload","r")
-if fd then
+local diff = mtkwifi.diff_profile(dev.profile)
+if next(diff) ~= nil then
 %>
     <span style="color:red;">(<a href="javascript:location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "reload", dev.devname)%>'">reload</a> to apply changes)</span>
 <% 
-fd:close()
-end
+    end
 %>
         </legend>
         <table id="dev-cfg-basic" class="cbi-section-table">
@@ -377,6 +376,7 @@ end
     <div class="cbi-page-actions">
         <input class="cbi-button cbi-button-apply" value="Reload" type="button" onclick='wifi_reload("<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "reload", devname)%>");'>
         <input class="cbi-button cbi-button-apply" value="Save" type="submit">
+        <input class="cbi-button cbi-button-apply" name="__apply" value="Save & Apply" type="submit">
         <input class="cbi-button cbi-button-reset" value="Reset" type="reset">
     </div>
 </form>

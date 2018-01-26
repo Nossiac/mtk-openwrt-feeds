@@ -105,6 +105,13 @@ function mt7603_reload(devname)
 	local nixio = require("nixio")
 	nixio.syslog("debug", "mt7603_reload called!")
 	mt7603_down()
+	mt7603_up()
+end
+
+function mt7603_restart(devname)
+	local nixio = require("nixio")
+	nixio.syslog("debug", "mt7603_restart called!")
+	mt7603_down()
 	os.execute("rmmod mt7603")
 	os.execute("modprobe mt7603")
 	mt7603_up()

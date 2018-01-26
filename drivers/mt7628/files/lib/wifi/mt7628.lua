@@ -105,6 +105,13 @@ function mt7628_reload(devname)
 	local nixio = require("nixio")
 	nixio.syslog("debug", "mt7628_reload called!")
 	mt7628_down()
+	mt7628_up()
+end
+
+function mt7628_restart(devname)
+	local nixio = require("nixio")
+	nixio.syslog("debug", "mt7628_restart called!")
+	mt7628_down()
 	os.execute("rmmod mt7628")
 	os.execute("modprobe mt7628")
 	mt7628_up()

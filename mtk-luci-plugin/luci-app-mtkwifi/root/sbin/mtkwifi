@@ -29,12 +29,6 @@ function wifi_common_up(devname)
 			os.execute("ifconfig "..vif.." up")
 		end
 	end
-
-	if devname then
-		os.execute("rm -f /tmp/mtk/wifi/"..devname.."*.need_reload")
-	else
-		os.execute("rm -f /tmp/mtk/wifi/*.need_reload")
-	end
 end
 
 
@@ -64,6 +58,11 @@ function wifi_common_reload(devname)
 	nixio.syslog("debug", "wifi_common_reload "..tostring(devname))
 	wifi_common_up()
 	wifi_common_down()
+end
+
+function wifi_common_restart(devname)
+	nixio.syslog("debug", "wifi_common_restart "..tostring(devname))
+	wifi_common_reload()
 end
 
 function wifi_common_reset(devname)
@@ -188,6 +187,7 @@ or cmd == "down"
 or cmd == "status"
 or cmd == "detect"
 or cmd == "reload"
+or cmd == "restart"
 or cmd == "reset" then
 	wifi(cmd, dev)
 elseif cmd == "reload_legacy" then

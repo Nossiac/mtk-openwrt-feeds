@@ -103,6 +103,14 @@ function mt7612_reload(devname)
 	local nixio = require("nixio")
 	nixio.syslog("debug", "mt7612_reload called!")
 	mt7612_down()
+	mt7612_up()
+end
+
+function mt7612_restart(devname)
+	local nixio = require("nixio")
+	nixio.syslog("debug", "mt7612_restart called!")
+	mt7612_down()
+	-- 7602 shares driver with 7612
 	os.execute("rmmod mt7612")
 	os.execute("modprobe mt7612")
 	mt7612_up()

@@ -163,6 +163,13 @@ function mt7615_reload(devname)
     local nixio = require("nixio")
     nixio.syslog("debug", "mt7615_reload called!")
     mt7615_down(devname)
+    mt7615_up(devname)
+end
+
+function mt7615_restart(devname)
+    local nixio = require("nixio")
+    nixio.syslog("debug", "mt7615_restart called!")
+    mt7615_down(devname)
     os.execute("rmmod mt7615")
     os.execute("modprobe mt7615")
     mt7615_up(devname)

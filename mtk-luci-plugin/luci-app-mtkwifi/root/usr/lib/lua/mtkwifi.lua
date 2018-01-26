@@ -16,17 +16,20 @@
 ]]
 
 local mtkwifi = {}
+local _, nixio = pcall(require, "nixio")
 
-function debug_write(...)
-    -- luci.http.write(...)
-    local ff = io.open("/tmp/mtkwifi", "a")
+function mtkwifi.debug(...)
+    local ff = io.open("/tmp/mtkwifi.dbg.log", "a")
     local vars = {...}
     for _, v in pairs(vars) do
         ff:write(v.." ")
     end
     ff:write("\n")
     ff:close()
-    nixio.syslog("debug", ...)
+end
+
+if not nixio then
+    nixio.syslog = mtkwifi.debug
 end
 
 function string:split(sep)
@@ -134,30 +137,31 @@ function mtkwifi.load_profile(path, raw)
                 k = string.sub(line, 1, i-1)
                 v = string.sub(line, i+1)
                 if cfgs[mtkwifi.__trim(k)] then
-                    nixio.syslog("warning", "skip repeated key"..line)
+                    mtkwifi.debug("warning", "skip repeated key"..line)
                 end
                 cfgs[mtkwifi.__trim(k)] = mtkwifi.__trim(v) or ""
             else
-                nixio.syslog("warning", "skip line without '=' "..line)
+                mtkwifi.debug("warning", "skip line without '=' "..line)
             end
         else
-            nixio.syslog("warning", "skip comment line "..line)
+            mtkwifi.debug("warning", "skip comment line "..line)
         end
     end
     return cfgs
 end
 
+function mtkwifi.__profile_bak_path(profile)
+    local bak = "/tmp/mtk/wifi/"..string.match(profile, "([^/]+\.dat)")..".last"
+    os.execute("mkdir -p /tmp/mtk/wifi")
+    return bak
+end
 
 function mtkwifi.save_profile(cfgs, path)
 
     if not cfgs then
-        debug_write("configuration was empty, nothing saved")
+        mtkwifi.debug("configuration was empty, nothing saved")
         return
     end
-    -- keep a backup for last commit
-    local bak = string.match(path, "([^/]+).dat")
-    os.execute("mkdir -p /tmp/mtk/wifi")
-    os.execute("cp -f "..path.." /tmp/mtk/wifi/"..bak..".last")
 
     local fd = io.open(path, "w")
     table.sort(cfgs, function(a,b) return a<b end)
@@ -175,59 +179,50 @@ function mtkwifi.save_profile(cfgs, path)
         local zone = l1 and l1.l1_path_to_zone(path)
 
         if not l1dat then
-            debug_write("save_profile: no l1dat", path)
+            mtkwifi.debug("save_profile: no l1dat", path)
             nvram.nvram_save_profile(path)
         else
             if zone then
-                debug_write("save_profile:", path, zone)
+                mtkwifi.debug("save_profile:", path, zone)
                 nvram.nvram_save_profile(path, zone)
             else
-                debug_write("save_profile:", path)
+                mtkwifi.debug("save_profile:", path)
                 nvram.nvram_save_profile(path)
             end
         end
     end
 end
 
-function mtkwifi.split_profile(path, path_2g, path_5g)
-    assert(path)
-    assert(path_2g)
-    assert(path_5g)
-    local cfgs = mtkwifi.load_profile(path)
-    local dirty = {
-        "Channel",
-        "WirelessMode",
-        "TxRate",
-        "WmmCapable",
-        "NoForwarding",
-        "HideSSID",
-        "IEEE8021X",
-        "PreAuth",
-        "AuthMode",
-        "EncrypType",
-        "RekeyMethod",
-        "RekeyInterval",
-        "PMKCachePeriod",
-        "DefaultKeyId",
-        "Key{n}Type",
-        "HT_EXTCHA",
-        "RADIUS_Server",
-        "RADIUS_Port",
-    }
-    local cfg5g = mtkwifi.deepcopy(cfgs)
-    for _,v in ipairs(dirty) do
-        cfg5g[v] = mtkwifi.token_get(cfgs[v], 1, 0)
-        assert(cfg5g[v])
+-- if path2 not give, we use path1's backup.
+function mtkwifi.diff_profile(path1, path2)
+    assert(path1)
+    if not path2 then
+        path2 = mtkwifi.__profile_bak_path(path1)
+        if not mtkwifi.exists(path2) then
+            return {}
+        end
     end
-    mtkwifi.save_profile(cfg5g, path_5g)
+    assert(path2)
 
-    local cfg2g = mtkwifi.deepcopy(cfgs)
-    for _,v in ipairs(dirty) do
-        cfg2g[v] = mtkwifi.token_get(cfgs[v], 1, 0)
-        assert(cfg2g[v])
+    local diff = {}
+    local cfg1 = mtkwifi.load_profile(path1) or {}
+    local cfg2 = mtkwifi.load_profile(path2) or {}
+
+    for k,v in pairs(cfg1) do
+        if cfg2[k] ~= cfg1[k] then
+            diff[k] = {cfg1[k] or "", cfg2[k] or ""}
+        end
     end
-    mtkwifi.save_profile(cfg2g, path_2g)
+
+    for k,v in pairs(cfg2) do
+        if cfg2[k] ~= cfg1[k] then
+            diff[k] = {cfg1[k] or "", cfg2[k] or ""}
+        end
+    end
+
+    return diff
 end
+
 
 -- Mode 12 and 13 are only available for STAs.
 local WirelessModeList = {
@@ -459,7 +454,7 @@ function mtkwifi.token_set(str, n, v)
     if not str then return end
     local tmp = mtkwifi.__cfg2list(str)
     if type(v) ~= type("") and type(v) ~= type(0) then
-        nixio.syslog("err", "invalid value type in token_set, "..type(v))
+        mtkwifi.debug("err", "invalid value type in token_set, "..type(v))
         return
     end
     if #tmp < tonumber(n) then
@@ -484,7 +479,6 @@ function mtkwifi.token_get(str, n, v)
 end
 
 function mtkwifi.search_dev_and_profile_orig()
-    local nixio = require("nixio")
     local dir = io.popen("ls /etc/wireless/")
     if not dir then return end
     local result = {}
@@ -492,31 +486,31 @@ function mtkwifi.search_dev_and_profile_orig()
     -- case 2: mt76xx.n.dat (multiple card of same dev)
     -- case 3: mt76xx.n.nG.dat (case 2 plus dbdc and multi-profile, bloody hell....)
     for line in dir:lines() do
-        -- nixio.syslog("debug", "scan "..line)
+        -- mtkwifi.debug("debug", "scan "..line)
         local tmp = io.popen("find /etc/wireless/"..line.." -type f -name \"*.dat\"")
         for datfile in tmp:lines() do
-            -- nixio.syslog("debug", "test "..datfile)
+            -- mtkwifi.debug("debug", "test "..datfile)
 
             repeat do
             -- for case 1
             local devname = string.match(datfile, "("..line..").dat")
             if devname then
                 result[devname] = datfile
-                -- nixio.syslog("debug", "yes "..devname.."="..datfile)
+                -- mtkwifi.debug("debug", "yes "..devname.."="..datfile)
                 break
             end
             -- for case 2
             local devname = string.match(datfile, "("..line.."%.%d)%.dat")
             if devname then
                 result[devname] = datfile
-                -- nixio.syslog("debug", "yes "..devname.."="..datfile)
+                -- mtkwifi.debug("debug", "yes "..devname.."="..datfile)
                 break
             end
             -- for case 3
             local devname = string.match(datfile, "("..line.."%.%d%.%dG)%.dat")
             if devname then
                 result[devname] = datfile
-                -- nixio.syslog("debug", "yes "..devname.."="..datfile)
+                -- mtkwifi.debug("debug", "yes "..devname.."="..datfile)
                 break
             end
             end until true
@@ -524,7 +518,7 @@ function mtkwifi.search_dev_and_profile_orig()
     end
 
     for k,v in pairs(result) do
-        nixio.syslog("debug", "search_dev_and_profile_orig: "..k.."="..v)
+        mtkwifi.debug("debug", "search_dev_and_profile_orig: "..k.."="..v)
     end
 
     return result
@@ -535,7 +529,6 @@ function mtkwifi.search_dev_and_profile_l1()
 
     if not l1dat then return end
 
-    local nixio = require("nixio")
     local result = {}
     local dbdc_2nd_if = ""
 
@@ -550,7 +543,7 @@ function mtkwifi.search_dev_and_profile_l1()
     end
 
     for k,v in pairs(result) do
-        nixio.syslog("debug", "search_dev_and_profile_l1: "..k.."="..v)
+        mtkwifi.debug("debug", "search_dev_and_profile_l1: "..k.."="..v)
     end
 
     return result
@@ -576,8 +569,8 @@ function mtkwifi.__setup_vifs(cfgs, devname, mainidx, subidx)
 
     vifs["__prefix"] = prefix
     if (cfgs.BssidNum == nil) then
-        debug_write("BssidNum configuration value not found.")
-        nixio.syslog("debug","BssidNum configuration value not found.")
+        mtkwifi.debug("BssidNum configuration value not found.")
+        mtkwifi.debug("debug","BssidNum configuration value not found.")
         return
     end
 
@@ -587,7 +580,7 @@ function mtkwifi.__setup_vifs(cfgs, devname, mainidx, subidx)
         dev_idx = string.match(devname, "(%w+)")
         main_ifname = l1dat and l1dat[dridx][devname].main_ifname or dbdc_prefix[mainidx][subidx].."0"
 
-        debug_write("setup_vifs", prefix, dev_idx, mainidx, subidx)
+        mtkwifi.debug("setup_vifs", prefix, dev_idx, mainidx, subidx)
 
         vifs[j].vifname = j == 1 and main_ifname or prefix..(j-1)
         if mtkwifi.exists("/sys/class/net/"..vifs[j].vifname) then
@@ -676,7 +669,6 @@ function mtkwifi.__setup_apcli(cfgs, devname, mainidx, subidx)
 end
 
 function mtkwifi.get_all_devs()
-    local nixio = require("nixio")
     local devs = {}
     local i = 1 -- dev idx
     local profiles = mtkwifi.search_dev_and_profile()
@@ -684,19 +676,19 @@ function mtkwifi.get_all_devs()
     local wapi_support = 0
 
     for devname,profile in pairs(profiles) do
-        debug_write("debug", "checking "..profile)
+        mtkwifi.debug("debug", "checking "..profile)
 
         local fd = io.open(profile,"r")
         if not fd then
-            nixio.syslog("debug", "cannot find "..profile)
+            mtkwifi.debug("debug", "cannot find "..profile)
         else
             fd:close()
-            nixio.syslog("debug", "load "..profile)
-            debug_write("loading profile"..profile)
+            mtkwifi.debug("debug", "load "..profile)
+            mtkwifi.debug("loading profile"..profile)
             local cfgs = mtkwifi.load_profile(profile)
             if not cfgs then
-                debug_write("error loading profile"..profile)
-                nixio.syslog("err", "error loading "..profile)
+                mtkwifi.debug("error loading profile"..profile)
+                mtkwifi.debug("err", "error loading "..profile)
                 return
             end
             devs[i] = {}
@@ -900,19 +892,19 @@ function mtkwifi.__restart_if_wps(devname, ifname, cfgs)
     wsc_conf_mode=mtkwifi.token_get(cfgs["WscConfMode"], ssid_index, "")
 
     os.execute("iwpriv "..ifname.." set WscConfMode=0")
-    debug_write("iwpriv "..ifname.." set WscConfMode=0")
+    mtkwifi.debug("iwpriv "..ifname.." set WscConfMode=0")
     os.execute("route delete 239.255.255.250")
-    debug_write("route delete 239.255.255.250")
+    mtkwifi.debug("route delete 239.255.255.250")
     if(mtkwifi.__any_wsc_enabled(wsc_conf_mode)) then
         os.execute("iwpriv "..ifname.." set WscConfMode=7")
-        debug_write("iwpriv "..ifname.." set WscConfMode=7")
+        mtkwifi.debug("iwpriv "..ifname.." set WscConfMode=7")
         os.execute("route add -host 239.255.255.250 dev br0")
-        debug_write("route add -host 239.255.255.250 dev br0")
+        mtkwifi.debug("route add -host 239.255.255.250 dev br0")
     end
 
     -- execute wps_action.lua file to send signal for current interface
     os.execute("lua wps_action.lua "..ifname)
-    debug_write("lua wps_action.lua "..ifname)
+    mtkwifi.debug("lua wps_action.lua "..ifname)
     return cfgs
 end
 

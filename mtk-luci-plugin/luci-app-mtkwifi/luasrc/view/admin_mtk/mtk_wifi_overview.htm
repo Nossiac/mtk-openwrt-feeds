@@ -39,12 +39,11 @@ local devs = mtkwifi.get_all_devs()
                     <td colspan="2" style="text-align:left">
                         <big><strong title="<%=dev.profile%>"><%=dev.devname%></strong></big>
                         <%
-                        local fd = io.open("/tmp/mtk/wifi/"..dev.devname..".need_reload","r")
-                        if fd then
+                        local diff = mtkwifi.diff_profile(dev.profile)
+                        if next(diff) ~= nil then
                         %>
                             <span style="color:red;">* need reload to apply changes</span>
                         <% 
-                        fd:close()
                         end
                         %>
                         <br>
