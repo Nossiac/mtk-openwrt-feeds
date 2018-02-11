@@ -28,7 +28,7 @@ These are prebuilt WiFi modules for OpenWrt/Lede, including:
 * mt7610 (done)
 * mt7602 (done)
 * mt7612 (done)
-* mt7603 (done) # buggy
+* mt7603 (done)
 * mt7615 (done)
 
 You can download all available wifi modules here:
@@ -36,9 +36,19 @@ You can download all available wifi modules here:
 
 	<wifichip>-for-<cpuname>-linux-<kernel-version>.ko
 
+A detailed document for using these WiFi modules is here:
+[about-mtk-wifi.md](https://github.com/Nossiac/mtk-openwrt-feeds/blob/master/about-mtk-wifi.md) .
+
 ### uci2dat
 
 An application that translates "/etc/config/wireless" into MTK's WiFi profiles (e.g. mt7620.dat). You may use it as an adapter to make MTK's WiFi drivers work with standard LuCi's WiFi management.
+
+### wificonf
+
+An application that reads/writes configuration files with "<Key>=[Value]" syntax. It can be used in your own scripts to help manipulate MTK WiFi profiles.
+
+If you use lua, you should take a look at:
+[https://github.com/Nossiac/mtk-openwrt-feeds/blob/master/mtk-luci-plugin/luci-app-mtkwifi/root/usr/lib/lua/mtkwifi.lua](https://github.com/Nossiac/mtk-openwrt-feeds/blob/master/mtk-luci-plugin/luci-app-mtkwifi/root/usr/lib/lua/mtkwifi.lua).
 
 ### mtk-nvram
 
