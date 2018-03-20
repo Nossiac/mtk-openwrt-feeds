@@ -41,11 +41,11 @@
     } while(0);
 
 int __quiet = 0;
+int __base64 = 0;
 char * __profile = NULL;
 char * EMPTY = "";
 
 
-#ifdef BASE64_SUPPORT
 int base64 = 0;
 static const unsigned char base64_table[65] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -175,10 +175,10 @@ unsigned char * base64_decode(const unsigned char *src, size_t len,
         }
     }
 
-    *out_len = pos - out;
+    if (out_len)
+        *out_len = pos - out;
     return out;
 }
-#endif
 
 
 char * __get_token(char * str, int idx)
@@ -359,7 +359,7 @@ int conf_get(char * key)
         *q = 0;
         q--;
     };  /* trim tail spaces */
-    printf("%s", p);
+    printf("%s\n", p);
 
     if(fp) fclose(fp);
     return OK;
@@ -375,6 +375,12 @@ int conf_set(char * key, char * value)
     char * profile = NULL;
     char * p = NULL;
     struct stat sb;
+
+    if (__base64)
+    {
+        value = (char *)base64_decode((unsigned char *)value, strlen(value), NULL);
+        ASSERT(value);
+    }
 
     profile = __get_profile(NULL);
     ASSERT(profile);
@@ -441,7 +447,7 @@ int conf_get_token(char * key, int idx)
     p = fgets(buffer, sizeof(buffer)-1, fp);
     if(!p) return OK;
 
-    printf("%s", __get_token(buffer, idx));
+    printf("%s\n", __get_token(buffer, idx));
 
     if(fp) fclose(fp);
     return OK;
@@ -521,6 +527,7 @@ int usage(void)
            "    wificonf [option] set <key> <idx> <value>\n"
            "\n"
            "Options:\n"
+           "    -e   use base64 encode.\n"
            "    -f   specify the profile.\n"
            "    -q   be quiet, no error will be reported.\n"
            "\n\n"
@@ -596,7 +603,7 @@ int main(int argn, char ** args)
 
     argv[0] = strdup(args[0]);
 
-    while ((c = getopt (argn, args, "f:q")) != -1)
+    while ((c = getopt (argn, args, "ef:qh")) != -1)
     {
         switch (c)
         {
@@ -606,6 +613,10 @@ int main(int argn, char ** args)
             case 'q':
                 __quiet = 1;
                 break;
+            case 'e':
+                __base64 = 1;
+                break;
+            case 'h':
             default:
                 return usage();
         }
