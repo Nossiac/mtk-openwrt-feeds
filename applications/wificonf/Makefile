@@ -1,6 +1,5 @@
 #
 # Hua Shao <nossiac@163.com>
-# 
 #
 
 include $(TOPDIR)/rules.mk
@@ -43,14 +42,14 @@ define Build/Prepare
 endef
 
 TARGET_CFLAGS += -Wall
-TARGET_CFLAGS += -Wno-error=format-security 
+TARGET_CFLAGS += -Wno-error=format-security
 
 define Package/wificonf/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/wificonf $(1)/usr/bin
 	if [ "$$(CONFIG_SUPPORT_LSDK_NVRAM_CMD)" != "" ]; then \
-		ln -s /usr/bin/wificonf $(1)/nvram_get; \
-		ln -s /usr/bin/wificonf $(1)/nvram_set; \
+		$(INSTALL_BIN) ./files/usr/bin/nvram_get $(1)/usr/bin/nvram_get; \
+		$(LN) /usr/bin/nvram_get $(1)/usr/bin/nvram_set; \
 	fi
 endef
 
