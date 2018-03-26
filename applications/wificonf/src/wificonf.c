@@ -63,9 +63,10 @@ unsigned char * base64_encode(const unsigned char *src, size_t len,
     olen++; /* nul termination */
     if (olen < len)
         return NULL; /* integer overflow */
-    out = malloc(olen);
+    out = malloc(olen+1); /* null terminated */
     if (out == NULL)
         return NULL;
+    out[olen] = 0;
 
     end = src + len;
     in = src;
@@ -375,10 +376,11 @@ int conf_set(char * key, char * value)
     char * profile = NULL;
     char * p = NULL;
     struct stat sb;
+    size_t len = 0;
 
     if (__base64)
     {
-        value = (char *)base64_decode((unsigned char *)value, strlen(value), NULL);
+        value = (char *)base64_decode((unsigned char *)value, strlen(value), &len);
         ASSERT(value);
     }
 
@@ -406,7 +408,10 @@ int conf_set(char * key, char * value)
     ret = fwrite(buffer, 1, nbytes, fp);
     ASSERT(ret == nbytes);
 
-    fprintf(fp, "%s=%s\n", key, value);
+    fprintf(fp, "%s=", key);
+    for (ret=0; ret<len; ret++)
+        fprintf(fp, "%c", value[ret]);
+    fprintf(fp, "\n");
 
     p = buffer + nbytes;
     while('\n' != *p && 0 != *p) p++;
