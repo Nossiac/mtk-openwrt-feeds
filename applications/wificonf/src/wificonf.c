@@ -138,9 +138,10 @@ unsigned char * base64_decode(const unsigned char *src, size_t len,
         return NULL;
 
     olen = count / 4 * 3;
-    pos = out = malloc(olen);
+    pos = out = malloc(olen+1);
     if (out == NULL)
         return NULL;
+    pos[olen] = 0;
 
     count = 0;
     for (i = 0; i < len; i++)
@@ -341,7 +342,7 @@ int conf_get(char * key)
     ASSERT(fp);
 
     offset = __locate_key(fp, key);
-    ASSERT(offset > 0);
+    ASSERT(offset >= 0);
 
     memset(buffer, 0, sizeof(buffer));
     fseek(fp, offset, SEEK_SET);
@@ -376,7 +377,7 @@ int conf_set(char * key, char * value)
     char * profile = NULL;
     char * p = NULL;
     struct stat sb;
-    size_t len = 0;
+    size_t len = strlen(value);
 
     if (__base64)
     {
@@ -391,7 +392,7 @@ int conf_set(char * key, char * value)
     ASSERT(fp);
 
     nbytes = __locate_key(fp, key);
-    ASSERT(nbytes > 0);
+    ASSERT(nbytes >= 0);
 
     ASSERT(stat(profile, &sb) == 0);
     buffer = (char *)malloc(sb.st_size + 1);
@@ -445,7 +446,7 @@ int conf_get_token(char * key, int idx)
     ASSERT(fp);
 
     offset = __locate_key(fp, key);
-    ASSERT(offset>0);
+    ASSERT(offset>=0);
 
     fseek(fp, offset, SEEK_SET);
     memset(buffer, 0, sizeof(buffer));
@@ -469,52 +470,55 @@ int conf_set_token(char * key, int idx, char * value)
     char * q = NULL;
     char * profile = NULL;
     struct stat sb;
+    size_t len = strlen(value);
 
-    do
+    ASSERT(key);
+    ASSERT(idx >= 0 && idx < 32);
+
+    if (__base64)
     {
-        ASSERT(key);
-        ASSERT(idx >= 0 && idx < 32);
-
-        profile = __get_profile(NULL);
-        ASSERT(profile);
-
-        ASSERT(stat(profile, &sb) == 0);
-        buffer = (char *)malloc(sb.st_size + 1);
-        ASSERT(buffer);
-        buffer[sb.st_size] = 0;
-
-        fp = fopen(profile, "rb");
-        ASSERT(fp);
-
-        ret = fread(buffer, 1, sb.st_size, fp);
-        ASSERT(ret == sb.st_size);
-
-        nbytes = __locate_key(fp, key);
-        ASSERT(nbytes>0);
-
-        fclose(fp);
-
-        /* write the first part. */
-        fp = fopen(profile, "wb");
-        ASSERT(fp);
-        ret = fwrite(buffer, 1, nbytes, fp);
-        ASSERT(ret == nbytes);
-
-        /* write new key-value. */
-        p = buffer+nbytes;
-        q = p;
-        while(*q != '\n' && q != 0) q++;
-        *q = 0;
-        q++;
-        p = __set_token(p, idx, value);
-        fprintf(fp, "%s\n", p);
-
-        /* write rest data */
-        nbytes = buffer + sb.st_size - q; /* remain data */
-        ret = fwrite(q, 1, nbytes, fp);
-        ASSERT(ret == nbytes);
+        value = (char *)base64_decode((unsigned char *)value, strlen(value), &len);
+        ASSERT(value);
     }
-    while(0);
+
+    profile = __get_profile(NULL);
+    ASSERT(profile);
+
+    ASSERT(stat(profile, &sb) == 0);
+    buffer = (char *)malloc(sb.st_size + 1);
+    ASSERT(buffer);
+    buffer[sb.st_size] = 0;
+
+    fp = fopen(profile, "rb");
+    ASSERT(fp);
+
+    ret = fread(buffer, 1, sb.st_size, fp);
+    ASSERT(ret == sb.st_size);
+
+    nbytes = __locate_key(fp, key);
+    ASSERT(nbytes>=0);
+
+    fclose(fp);
+
+    /* write the first part. */
+    fp = fopen(profile, "wb");
+    ASSERT(fp);
+    ret = fwrite(buffer, 1, nbytes, fp);
+    ASSERT(ret == nbytes);
+
+    /* write new key-value. */
+    p = buffer+nbytes;
+    q = p;
+    while(*q != '\n' && q != 0) q++;
+    *q = 0;
+    q++;
+    p = __set_token(p, idx, value);
+    fprintf(fp, "%s\n", p);
+
+    /* write rest data */
+    nbytes = buffer + sb.st_size - q; /* remain data */
+    ret = fwrite(q, 1, nbytes, fp);
+    ASSERT(ret == nbytes);
 
     if(fp) fclose(fp);
     return OK;
@@ -532,7 +536,7 @@ int usage(void)
            "    wificonf [option] set <key> <idx> <value>\n"
            "\n"
            "Options:\n"
-           "    -e   use base64 encode.\n"
+           "    -e   use base64 encoded <value>.\n"
            "    -f   specify the profile.\n"
            "    -q   be quiet, no error will be reported.\n"
            "\n\n"
@@ -602,7 +606,7 @@ int use_profile(char * profile, char * alias)
 int main(int argn, char ** args)
 {
     int argc = 1;
-    char c;
+    int c;
     int i;
     char * argv[8];
 
