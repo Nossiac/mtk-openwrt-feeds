@@ -46,7 +46,7 @@ local debug = 0
 
     <fieldset class="cbi-section" id="vif-cfg-apcli">
         <legend> <a name="apcli_scan_section">Wireless Repeater - <%=devname.."@"..vifname%> </a></legend>
-        <pre style="display: none;">Help:
+        <pre> Manually setup apcli0 connection:
         iwpriv <%=vifname%> set ApCliEnable=0              // disable sta mode first
         iwpriv <%=vifname%> set ApCliAuthMode=             // root ap authentication mode
         iwpriv <%=vifname%> set ApCliEncrypType=           // root ap encryption type
@@ -63,17 +63,6 @@ local debug = 0
             &nbsp;&nbsp;&nbsp; Please waiting while the page is loading......
         </div>
         <div id="aplist">
-        <!--
-            <table>
-                <tr>
-                    <th>SSID</th>
-                    <th>Channel</th>
-                    <th>BSSID</th>
-                    <th>AuthMode</th>
-                    <th>RSSI</th>
-                </tr>
-            </table>
-        -->
         </div>
     </fieldset>
     <fieldset class="cbi-section" id="vif-cfg-apcli-config">
@@ -191,6 +180,24 @@ local debug = 0
                 window.location.reload();
             }
         );
+    }
+
+
+    function decode_ssid(ssid)
+    {
+        ssid = ssid.replace(/&amp;/g, "&");
+        ssid = ssid.replace(/&lt;/g, "<");
+        ssid = ssid.replace(/&gt;/g, ">");
+        ssid = ssid.replace(/&#34;/g, "\"");
+        ssid = ssid.replace(/&#39;/g, "'");
+        ssid = ssid.replace(/&nbsp;/g, " ");
+        var patt = new RegExp(/&#(\d+);/);
+
+        while (res = patt.exec(ssid))
+        {
+            ssid = ssid.replace("&#" + res[1] + ";", String.fromCharCode(res[1]));
+        }
+        return ssid;
     }
 
     var ap_list;
@@ -329,131 +336,6 @@ local debug = 0
         toggle_apcli(false);
         <% end %>
      }
-
-    function decode_ssid(ssid)
-    {
-        ssid = ssid.replace(/&amp;/g, "&");
-        ssid = ssid.replace(/&lt;/g, "<");
-        ssid = ssid.replace(/&gt;/g, ">");
-        ssid = ssid.replace(/&#34;/g, "\"");
-        ssid = ssid.replace(/&#39;/g, "'");
-        ssid = ssid.replace(/&nbsp;/g, " ");
-        var patt = new RegExp(/&#(\d+);/);
-
-        while (res = patt.exec(ssid))
-        {
-            ssid = ssid.replace("&#" + res[1] + ";", String.fromCharCode(res[1]));
-        }
-        return ssid;
-    }
-
-    //Interaction functions
-    //========================================================================================
-    function change_ap(ap_idx)
-    {
-        //console.log("selected ap_idx=", ap_idx);
-        document.getElementById("pin_ap_ssid").value = ap_list[ap_idx]['ssid'];
-        document.getElementById("root_ap_ssid").value = decode_ssid(ap_list[ap_idx]['ssid']);
-        document.getElementById("pin_ap_bssid").value = ap_list[ap_idx]['bssid'];
-    }
-
-    function on_any_start()
-    {
-        show_waiting('ON');
-    }
-
-    function on_any_end()
-    {
-        show_waiting('OFF');
-    }
-
-    function on_rescan_end()
-    {
-        on_any_end();
-    }
-
-    function display(mode, id)
-    {
-        document.getElementById(id).style.display = mode;
-    }
-
-    function show_waiting(mode)
-    {
-        if(mode == "ON"){
-            waiting_count += 1;
-            document.getElementById("loadingbar").style.display="";
-        } else {
-            waiting_count = 0;
-            document.getElementById("loadingbar").style.display="none";
-        }
-        console.log("waiting_count="+waiting_count);
-
-    }
-
-    function clean_aplist_table()
-    {
-        var table = document.getElementById('aplist-site-survey');
-        //console.log("clean_aplist_table.aplist len=" + table.rows.length);
-        while(table.rows.length > 1)
-            table.deleteRow(-1);
-    }
-
-    function insert_aplist_table()
-    {
-        var i, tr_row, td_cell;
-        var tableid = document.getElementById('aplist-site-survey');
-
-    //console.log("insert_aplist_table <-----");
-
-        for (i = 0; ap_list[i] ; i++){
-            tr_row = tableid.insertRow(-1);
-            td_cell = tr_row.insertCell(-1);
-            td_cell.innerHTML = "<input type='radio' name='ap_idx' value='" + i + "' onClick='change_ap(this.value)'>";
-            td_cell = tr_row.insertCell(-1);
-            td_cell.innerHTML = ap_list[i]['channel'];
-            td_cell = tr_row.insertCell(-1);
-            td_cell.innerHTML = ap_list[i]['ssid'];
-            td_cell = tr_row.insertCell(-1);
-            td_cell.innerHTML = ap_list[i]['bssid'];
-            td_cell = tr_row.insertCell(-1);
-            td_cell.innerHTML = ap_list[i]['security'];
-            td_cell = tr_row.insertCell(-1);
-            td_cell.innerHTML = ap_list[i]['rssi'];
-            td_cell = tr_row.insertCell(-1);
-            td_cell.innerHTML = ap_list[i]['mode'];
-            td_cell = tr_row.insertCell(-1);
-            td_cell.innerHTML = ap_list[i]['extch'];
-            td_cell = tr_row.insertCell(-1);
-            td_cell.innerHTML = ap_list[i]['nt'];
-            td_cell = tr_row.insertCell(-1);
-            td_cell.innerHTML = ap_list[i]['wps'];
-        }
-    }
-
-    function get_site_survey_cb(request, mode)
-    {
-        //console.log("get_wps_site_survey_cb.responseText=" + request.responseText);
-        //console.log("get_wps_site_survey_cb.args=" + mode);
-        ap_list = JSON.parse(request);
-        ap_list = filter_WPS_results(ap_list, mode);
-
-        clean_aplist_table();
-        insert_aplist_table();
-
-        on_rescan_end();
-    }
-
-    function get_site_survey(vifname, mode)
-    {
-        XHR.get('<%=luci.dispatcher.build_url("admin",  "mtk",  "wifi",  "apcli_scan")%>/' + vifname, null, 
-            function(x)
-            {
-                console.log(x);
-                console.log(x.response);
-                get_site_survey_cb(x.response, mode);
-            }
-        );
-    }
 
 
 </script>
