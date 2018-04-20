@@ -542,7 +542,7 @@ function vif_cfg(dev, vif)
         cfgs = initialize_multiBssParameters(cfgs, vif_idx)
 
     end
-`
+
     -- "__" should not be in the name if user wants to copy formvalue data directly in the dat file variable
     for k,v in pairs(http.formvalue()) do
         if type(v) ~= type("") and type(v) ~= type(0) then
@@ -558,7 +558,6 @@ function vif_cfg(dev, vif)
     cfgs["AccessControlList"..vif_idx-1] = table.concat(t, ";")
 
         __security_cfg(cfgs, vif_idx)
-    end
 
     mtkwifi.debug(devname, profile)
     mtkwifi.save_profile(cfgs, profile)
