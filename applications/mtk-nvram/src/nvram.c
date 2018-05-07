@@ -305,6 +305,7 @@ int32_t nvram_parse(char * section, char * cachefile)
         }
     }
 
+    if (data) free(data);
     fclose(fp);
     return OK;
 }
@@ -365,7 +366,6 @@ int32_t nvram_commit(char flash)
             crc32(0, (uint8_t *)(buffer + nvramcache[sect].offset+4), nvramcache[sect].size-4);
         *(uint32_t *)(buffer + nvramcache[sect].offset) = nvramcache[sect].crc;
         DEBUG("cal crc32 = 0x%8x!\n", nvramcache[sect].crc);
-        p = buffer + nvramcache[sect].offset;
 
         fseek(fp, nvramcache[sect].offset, SEEK_SET);
         DEBUG("write nvram raw data, offset %u, size %u!\n",

@@ -140,7 +140,6 @@ int32_t flash_read(char *path, char *buf, off_t from, size_t len)
 int32_t flash_write(char *path, char *buf, off_t to, size_t len)
 {
     int32_t fd, ret = 0;
-    char *bak = NULL;
     struct mtd_info_user info;
     struct erase_info_user ei;
 
@@ -170,6 +169,7 @@ int32_t flash_write(char *path, char *buf, off_t to, size_t len)
         {
             int piece_size;
             unsigned int piece, bakaddr;
+            char *bak = NULL;
 
             bak = (char *)malloc(info.erasesize);
             if (bak == NULL)
@@ -236,7 +236,6 @@ int32_t flash_write(char *path, char *buf, off_t to, size_t len)
             {
                 fprintf(stderr, "Writing to mtd failed\n");
                 close(fd);
-                free(bak);
                 return -1;
             }
 
