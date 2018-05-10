@@ -54,9 +54,9 @@ local debug = 0
         iwpriv <%=vifname%> set ApCliWirelessMode=         // root ap wifi mode
         iwpriv <%=vifname%> set ApCliSsid=                 // root ap ssid
         iwpriv <%=vifname%> set ApCliEnable=1              // enable sta mode</pre>
-        <br>
+        <br />
         <p class="left">
-            <input id="scan" type="button" class="cbi-button cbi-button-find" onclick="get_ap_list('<%=vifname%>')" value="Scan Wireless Network"/>
+            <input id="scan" type="button" class="cbi-button cbi-button-find" onclick="get_ap_list('<%=vifname%>')" value="Scan Wireless Network" />
         </p>
         <div id="loading" style="display:none;">
         <img src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle;" />
@@ -73,8 +73,8 @@ local debug = 0
             <tr>
                 <td>MAC Repeater Mode</td>
                 <td>
-                    <input type="radio" name="MACRepeaterEn" value="1" <% if cfgs.MACRepeaterEn == "1" then %> checked="checked"<% end %>/> Enable
-                    <input type="radio" name="MACRepeaterEn" value="0" <% if cfgs.MACRepeaterEn ~= "1" then %> checked="checked"<% end %>/> Disable
+                    <input type="radio" name="MACRepeaterEn" value="1" <% if cfgs.MACRepeaterEn == "1" then %> checked="checked"<% end %> /> Enable
+                    <input type="radio" name="MACRepeaterEn" value="0" <% if cfgs.MACRepeaterEn ~= "1" then %> checked="checked"<% end %> /> Disable
                 </td>
                 <td></td>
             </tr>
@@ -162,9 +162,9 @@ local debug = 0
     </fieldset>
 
     <div class="cbi-page-actions" id="apcli_form_buttons">
-        <input class="cbi-button cbi-button-apply" value="Reload" type="button" onclick='wifi_reload("<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "reload", devname)%>");'>
-        <input class="cbi-button cbi-button-apply" value="Save" type="submit">
-        <input class="cbi-button cbi-button-reset" value="Reset" type="reset">
+        <input class="cbi-button cbi-button-apply" value="Reload" type="button" onclick='wifi_reload("<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "reload", devname)%>");' />
+        <input class="cbi-button cbi-button-apply" value="Save" type="submit" />
+        <input class="cbi-button cbi-button-reset" value="Reset" type="reset" />
     </div>
 </form>
 

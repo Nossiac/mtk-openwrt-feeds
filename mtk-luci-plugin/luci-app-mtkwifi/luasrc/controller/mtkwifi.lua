@@ -32,7 +32,14 @@ end
 
 
 function index()
-    entry({"admin", "mtk"}, alias({"admin", "mtk", "console"}), _("MTK"), 80)
+    local page
+
+    page = node("admin", "mtk")
+    page.target = firstchild()
+    page.title  = _("MTK")
+    page.order  = 80
+    page.index  = true
+
     entry({"admin", "mtk", "wifi"}, template("admin_mtk/mtk_wifi_overview"), _("WiFi configuration"), 1)
     entry({"admin", "mtk", "wifi", "dev_cfg_view"}, template("admin_mtk/mtk_wifi_dev_cfg")).leaf = true
     entry({"admin", "mtk", "wifi", "dev_cfg"}, call("dev_cfg")).leaf = true

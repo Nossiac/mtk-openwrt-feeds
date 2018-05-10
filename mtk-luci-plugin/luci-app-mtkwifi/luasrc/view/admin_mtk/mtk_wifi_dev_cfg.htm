@@ -374,14 +374,14 @@ if next(diff) ~= nil then
 
     </fieldset>
     <div class="cbi-page-actions">
-        <input class="cbi-button cbi-button-apply" value="Reload" type="button" onclick='wifi_reload("<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "reload", devname)%>");'>
-        <input class="cbi-button cbi-button-apply" value="Save" type="submit">
-        <input class="cbi-button cbi-button-apply" name="__apply" value="Save & Apply" type="submit">
-        <input class="cbi-button cbi-button-reset" value="Reset" type="reset">
+        <input class="cbi-button cbi-button-apply" value="Reload" type="button" onclick='wifi_reload("<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "reload", devname)%>");' />
+        <input class="cbi-button cbi-button-apply" value="Save" type="submit" />
+        <input class="cbi-button cbi-button-apply" name="__apply" value="Save & Apply" type="submit" />
+        <input class="cbi-button cbi-button-reset" value="Reset" type="reset" />
     </div>
 </form>
 
- 
+
 <form method="post" name="cbi2" action="<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "dev_cfg_raw", devname)%>" enctype="multipart/form-data" onreset="return cbi_validate_reset(this)" onsubmit="return cbi_validate_form(this, 'Some fields are invalid, cannot save values!')" autocomplete="off">
     <fieldset class="cbi-section">
         <legend> Raw Configurations ( Edit WiFi profile directly )</legend>
@@ -394,9 +394,9 @@ if next(diff) ~= nil then
         %></textarea>
     </fieldset>
     <div class="cbi-page-actions">
-        <input class="cbi-button cbi-button-reset" value="Reset" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "dev_cfg_view", devname)%>'" type="button">
-        <input class="cbi-button cbi-button-apply" id="save" value="Save" type="submit" onclick="if (confirm('You are going to overwrite the profile directly, are you sure?')) return true; else return false;">
-        <input class="cbi-button cbi-button-apply" id="reset" value="Restore Profile to Factory Setting" type="button" onclick="if (confirm('You are going to reset the profile of <%=devname%> to factory default, are you sure?')) location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "dev_cfg_reset", devname)%>'">
+        <input class="cbi-button cbi-button-reset" value="Reset" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "dev_cfg_view", devname)%>'" type="button" />
+        <input class="cbi-button cbi-button-apply" id="save" value="Save" type="submit" onclick="if (confirm('You are going to overwrite the profile directly, are you sure?')) return true; else return false;" />
+        <input class="cbi-button cbi-button-apply" id="reset" value="Restore Profile to Factory Setting" type="button" onclick="if (confirm('You are going to reset the profile of <%=devname%> to factory default, are you sure?')) location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "dev_cfg_reset", devname)%>'" />
     </div>
 </form>
 

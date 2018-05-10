@@ -24,9 +24,6 @@ local devs = mtkwifi.get_all_devs()
     </fieldset>
     <% end %>
 
-
-    </fieldset>
-
     <% for _,dev in ipairs(devs) do %>
     <fieldset class="cbi-section">
         <table class="cbi-section-table" style="margin:10px; empty-cells:hide">
@@ -34,7 +31,7 @@ local devs = mtkwifi.get_all_devs()
             <tbody>
                 <tr>
                     <td style="width:34px">
-                        <img src="/luci-static/resources/icons/wifi_big.png" style="float:left; margin-right:10px">
+                        <img src="/luci-static/resources/icons/wifi_big.png" style="float:left; margin-right:10px" />
                     </td>
                     <td colspan="2" style="text-align:left">
                         <big><strong title="<%=dev.profile%>"><%=dev.devname%></strong></big>
@@ -46,13 +43,13 @@ local devs = mtkwifi.get_all_devs()
                         <% 
                         end
                         %>
-                        <br>
-                        <span> work mode: <% if dev.ApCliEnable == "1" then %> APCli <% else %> AP<% end %> <!--  <br> driver: <%=dev.version%> --></span>
+                        <br/>
+                        <span> work mode: <% if dev.ApCliEnable == "1" then %> APCli <% else %> AP<% end %> <!--  <br/> driver: <%=dev.version%> --></span>
                     </td>
                     <td style="width:310px;text-align:right">
-                        <input class="cbi-button cbi-button-reload" style="width:100px" title="Reload WiFi network" value="Reload" type="button" onclick='wifi_reload("<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "reload", dev.devname)%>");'>
-                        <input class="cbi-button cbi-button-edit" style="width:100px" title="Configure WiFi device" value="Config" type="button" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "dev_cfg_view", dev.devname)%>'">
-                        <input class="cbi-button cbi-button-add" style="width:100px" title="Add WiFi network" value="Add" type="button" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "vif_add_view", dev.devname,dev.vifs.__prefix)%>'">
+                        <input class="cbi-button cbi-button-reload" style="width:100px" title="Reload WiFi network" value="Reload" type="button" onclick='wifi_reload("<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "reload", dev.devname)%>");' />
+                        <input class="cbi-button cbi-button-edit" style="width:100px" title="Configure WiFi device" value="Config" type="button" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "dev_cfg_view", dev.devname)%>'" />
+                        <input class="cbi-button cbi-button-add" style="width:100px" title="Add WiFi network" value="Add" type="button" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "vif_add_view", dev.devname,dev.vifs.__prefix)%>'" />
                     </td>
                 </tr>
                 <!-- /physical device -->
@@ -62,13 +59,13 @@ local devs = mtkwifi.get_all_devs()
                     <td></td>
                     <td class="cbi-value-field" style="width:16px; padding:3px">
                         <% if vif.state == "up" then %>
-                        <img src="/luci-static/resources/icons/signal-75-100.png">
+                        <img src="/luci-static/resources/icons/signal-75-100.png" />
                         <% else %>
-                        <img src="/luci-static/resources/icons/signal-none.png">
+                        <img src="/luci-static/resources/icons/signal-none.png" />
                         <% end %>
                     </td>
                     <td class="cbi-value-field" style="vertical-align:middle; text-align:left; padding:3px"><strong>Interface:</strong> <%=vif.vifname%> | <strong>Type:</strong> AP | <strong>SSID:</strong> <%=vif.__ssid%> | <strong>Channel:</strong> <%=vif.__channel or dev.Channel%> 
-                        <br>
+                        <br/>
                         <% if vif.state == "up" then %>
                         <strong>BSSID:</strong>:<%=vif.__bssid%> | <strong>Mode:</strong> <%=dev.WirelessModeList[tonumber(vif.__wirelessmode or dev.WirelessMode)]%>
                         <% else %>
@@ -77,14 +74,14 @@ local devs = mtkwifi.get_all_devs()
                     </td>
                     <td class="cbi-value-field" style="text-align:right">
                         <% if not vif.state then %>
-                        <input class="cbi-button cbi-button-apply" style="width:100px" title="Enable this network" value="Enable" type="button" onclick="alert('Please restart manually to create this interface.')">
+                        <input class="cbi-button cbi-button-apply" style="width:100px" title="Enable this network" value="Enable" type="button" onclick="alert('Please restart manually to create this interface.')" />
                         <% elseif vif.state == "up" then %>
-                        <input class="cbi-button cbi-button-reset" style="width:100px" title="Disable this network" value="Disable" type="button" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "vif_disable", vif.vifname)%>'">
+                        <input class="cbi-button cbi-button-reset" style="width:100px" title="Disable this network" value="Disable" type="button" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "vif_disable", vif.vifname)%>'" />
                         <% else %>
-                        <input class="cbi-button cbi-button-apply" style="width:100px" title="Enable this network" value="Enable" type="button" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "vif_enable", vif.vifname)%>'">
+                        <input class="cbi-button cbi-button-apply" style="width:100px" title="Enable this network" value="Enable" type="button" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "vif_enable", vif.vifname)%>'" />
                         <% end %>
-                        <input class="cbi-button cbi-button-edit" style="width:100px" title="Edit this network" value="Config" type="button" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "vif_cfg_view", dev.devname, vif.vifname)%>'">
-                        <input class="cbi-button cbi-button-remove" style="width:100px" title="Delete this network" value="Remove" type="button" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "vif_del", dev.devname, vif.vifname)%>'">
+                        <input class="cbi-button cbi-button-edit" style="width:100px" title="Edit this network" value="Config" type="button" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "vif_cfg_view", dev.devname, vif.vifname)%>'" />
+                        <input class="cbi-button cbi-button-remove" style="width:100px" title="Delete this network" value="Remove" type="button" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "vif_del", dev.devname, vif.vifname)%>'" />
                     </td>
                 </tr>
                 <% end %>
@@ -95,13 +92,13 @@ local devs = mtkwifi.get_all_devs()
                     <td></td>
                     <td class="cbi-value-field" style="width:16px; padding:3px">
                         <% if dev.apcli.state == "up" then %>
-                        <img src="/luci-static/resources/icons/signal-75-100.png">
+                        <img src="/luci-static/resources/icons/signal-75-100.png" />
                         <% else %>
-                        <img src="/luci-static/resources/icons/signal-none.png">
+                        <img src="/luci-static/resources/icons/signal-none.png" />
                         <% end %>
                     </td>
                     <td class="cbi-value-field" style="vertical-align:middle; text-align:left; padding:3px"><strong>Interface:</strong> <%=dev.apcli.devname%> | <strong>Type:</strong> STA | <strong>Status:</strong> <%=dev.apcli.status%>
-                        <br>
+                        <br/>
                         <% if dev.apcli.status == "Connected" then %>
                         <strong>BSSID:</strong>:<%=dev.apcli.bssid%> |
                         <strong>SSID:</strong>:<%=dev.apcli.ssid%>
@@ -111,18 +108,18 @@ local devs = mtkwifi.get_all_devs()
                     </td>
                     <td style="text-align:right">
                         <% if dev.apcli.state == "up" then %>
-                        <input class="cbi-button cbi-button-reset" style="width:100px" title="Disable this network" value="Disable" type="button" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "vif_disable", dev.apcli.vifname)%>'">
+                        <input class="cbi-button cbi-button-reset" style="width:100px" title="Disable this network" value="Disable" type="button" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "vif_disable", dev.apcli.vifname)%>'" />
                         <% else %>
-                        <input class="cbi-button cbi-button-apply" style="width:100px" title="Enable this network" value="Enable" type="button" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "vif_enable", dev.apcli.vifname)%>'">
+                        <input class="cbi-button cbi-button-apply" style="width:100px" title="Enable this network" value="Enable" type="button" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "vif_enable", dev.apcli.vifname)%>'" />
                         <% end %>
 
                         <% if dev.apcli.status == "Connected" then %>
-                        <input class="cbi-button cbi-button-remove" style="width:100px" title="Reload WiFi network" value="Disconnect" type="button" onclick='wifi_reload("<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "apcli_disconnect", dev.devname, dev.apcli.vifname)%>")'>
+                        <input class="cbi-button cbi-button-remove" style="width:100px" title="Reload WiFi network" value="Disconnect" type="button" onclick='wifi_reload("<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "apcli_disconnect", dev.devname, dev.apcli.vifname)%>")' />
                         <% else %>
-                        <!-- <input class="cbi-button cbi-button-reload" style="width:100px" title="Reload WiFi network" value="Connect" type="button" onclick='wifi_reload("<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "apcli_connect", dev.devname,dev.apcli.vifname)%>")'> -->
+                        <!-- <input class="cbi-button cbi-button-reload" style="width:100px" title="Reload WiFi network" value="Connect" type="button" onclick='wifi_reload("<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "apcli_connect", dev.devname,dev.apcli.vifname)%>")' /> -->
                         <% end %>
 
-                        <input class="cbi-button cbi-button-edit" style="width:100px" title="Configure WiFi device" value="Config" type="button" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "apcli_cfg_view", dev.devname, dev.apcli.vifname)%>'">
+                        <input class="cbi-button cbi-button-edit" style="width:100px" title="Configure WiFi device" value="Config" type="button" onclick="location.href='<%=luci.dispatcher.build_url("admin", "mtk", "wifi", "apcli_cfg_view", dev.devname, dev.apcli.vifname)%>'" />
                     </td>
                 </tr>
                 <% end %>
@@ -155,7 +152,6 @@ local devs = mtkwifi.get_all_devs()
         </table>
     </fieldset>
 -->
-    <%+footer%>
 
 <script type="text/javascript">
 function wifi_reload(url) {
@@ -171,3 +167,5 @@ function wifi_reload(url) {
     );
 }
 </script>
+
+<%+footer%>
