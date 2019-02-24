@@ -84,7 +84,12 @@ The wireless network is now working.
 The driver usually loads 2 files during runtime.
 
 * **mt76xx.dat** This is called "profile", which is actually the runtime configuration file for wifi driver. It has a list of "Key=Value" inside. If you build the module using **feeds**, the file will be ready, or you need to create one yourself.
-* **e2p.bin / eeprom.bin**  This is a small binary file that contains a lot of HW parameters for the wifi chip. Usually the data is saved in a "flash" partition named "factory" on your device. It should be provided by the manufacture. You can extract it using `dd` and put the file under "/lib/firmware" as the driver hint.
+* **e2p.bin / eeprom.bin**  This is a small binary file that contains a lot of HW parameters for the wifi chip. Usually the data is saved in a "flash" partition named "factory" on your device. It should be provided by the manufacture. By default OpenWrt will automatically detect the factory partition (if available), create the file(s) under /lib/firmware/ and move it in place:
+```
+root@OpenWrt:~# ls /lib/firmware/mt7662.bin -lah
+-rwxr-xr-x    1 root     root       80.0K Jan 30 12:21 /lib/firmware/mt7662.bin
+```
+If the binary file is missing, you can try to extract it using `dd` and the following command: `dd if=/dev/$(grep -i '"factory"' /proc/mtd | cut -c 1-4) of=/lib/firmware/<FILENAME>.bin bs=1 count=512` (tested with Xiaomi Mi Router R3). If necceassry, use your stock firmware backup to recover the flash partition.
 
 ### 2. No wireless network can be found.
 There are a lot of possibilities, you can dig some useful info following these steps:
